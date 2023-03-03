@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<style>
+#myContainer {
+  width: 400px;
+  height: 400px;
+  position: relative;
+  border-style: dotted;
+}
+#carLane1 {
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  background-color: red;
+}
+
+
+#carLane2 {
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  background-color: green;
+}
+
+
+#watchPoint {
+  width: 3px;
+  height: 400px;
+  position: absolute;
+  background-color: black;
+}
+</style>
+<body>
+
+<center><h1>Traffic Flow Simulator</h1></center>
+
+<p>
+    <button onclick="lane1CarMove()">Click to Start</button> 
+</p>
+
+<p>
+    <button onclick="addLane2()">Add Lane 2</button> 
+</p>
+<p>
+    <button onclick="updateFrameRateLane1()">Update speed Lane 1</button> 
+    <select name="lane1Speed" id="lane1Speed">
+        <option value="medium">Medium</option>
+        <option value="fast">Fast</option>
+        <option value="slow">Slow</option>
+      </select>
+</p>
+<p>
+    <button onclick="updateFrameRateLane2()">Update speed Lane 2</button> 
+    <select name="lane2Speed" id="lane2Speed">
+        <option value="medium">Medium</option>
+        <option value="fast">Fast</option>
+        <option value="slow">Slow</option>
+      </select>
+</p>
+
+Lane 1 Cars : <div id ="lane1Cars" style="display: inline-block;">0</div><br/>
+Lane 1 Cars Mins : <div id ="lane1CarTime" style="display: inline-block;">0</div><br/>
+Lane 1 Car Rate flow / min : <div id ="lane1CarFlow" style="display: inline-block;">0</div><br/>
+<br>
+Lane 2 Cars : <div id ="lane2Cars" style="display: inline-block;">0</div><br/>
+Lane 2 Cars Mins : <div id ="lane2CarTime" style="display: inline-block;">0</div><br/>
+Lane 2 Car Rate flow / min : <div id ="lane2CarFlow" style="display: inline-block;">0</div><br/>
+<br><br>
+Average Car Rate flow / min : <div id ="avgRateFlow" style="display: inline-block;">0</div><br/>
+
+<div id ="myContainer">
+<!--<div id ="carLane1"></div>-->
+<img src="blue.jpg" id ="carLane1"/>
+<!--<div id ="carLane2"></div>-->
+<img src="pink.jpg" id ="carLane2"/>
+<!--<div id ="watchPoint"></div>-->
+<img src="Vertical-Line-PNG-Images.png" id ="watchPoint"/>
+</div>
+
+<script>
+
+updateAvgId = null
+clearInterval(updateAvgId);
+car_rate_flow_per_min_lane1 = 0;
+car_rate_flow_per_min_lane2 = 0;
+
+updateAvgId = setInterval(updateAverage, 500);
+
+    function updateAverage(){
+
+        if(car_rate_flow_per_min_lane1 !=0 && car_rate_flow_per_min_lane2 !=0){
+
+            averageRateFlow = (car_rate_flow_per_min_lane1+car_rate_flow_per_min_lane2)/2
+            console.log("averageRateFlow--"+averageRateFlow)
+            document.getElementById("avgRateFlow").innerHTML = Math.round(averageRateFlow)
+
+        }else if(car_rate_flow_per_min_lane1 !=0){
+            document.getElementById("avgRateFlow").innerHTML = Math.round(car_rate_flow_per_min_lane1)
+        }
+        
+    }
+
+//lane 1 car
+var idLane1 = null;
+var elem = document.getElementById("watchPoint");   
+elem.style.left = 250 + 'px'; 
+count_cars_lane1 = 0;
+frame_rate_lane1 = 10
+
+//lane 2 car
+var idLane2 = null;
+count_cars_lane2 = 0;
+frame_rate_lane2 = 10
+
+
+var elem_carLane2 = document.getElementById("carLane2");   
+elem_carLane2.style.top = 100 + 'px'; 
+elem_carLane2.style.visibility = "hidden";
+
+function updateFrameRateLane1() {
+    speed_car_lane1 = document.getElementById("lane1Speed").value
+
+    if(speed_car_lane1 == "medium"){
+
+        frame_rate_lane1 = 10
+
+    }else if(speed_car_lane1 == "fast"){
+
+        frame_rate_lane1 = 1
+
+    }else if(speed_car_lane1 == "slow"){
+
+        frame_rate_lane1 = 50
+
+    }
+
+    console.log("speed_car_lane1--" + speed_car_lane1)
+    console.log("frame_rate_lane1--->" + frame_rate_lane1)
+}
+
+function updateFrameRateLane2() {
+    speed_car_lane2 = document.getElementById("lane2Speed").value
+
+    if(speed_car_lane2 == "medium"){
+
+        frame_rate_lane2 = 10
+
+    }else if(speed_car_lane2 == "fast"){
+
+        frame_rate_lane2 = 1
+
+    }else if(speed_car_lane2 == "slow"){
+
+        frame_rate_lane2 = 50
+
+    }
+    console.log("speed_car_lane2--" + speed_car_lane2)
+    console.log("frame_rate_lane2--->" + frame_rate_lane2)
+    
+}
+
+function addLane2() {
+
+    elem_carLane2 = document.getElementById("carLane2");   
+    elem_carLane2.style.visibility = "visible";
+
+    lane2CarMove()
+
+}
+
+
+
+function lane1CarMove() {
+
+//start the timer
+  let start = Date.now();
+  var elem_carLane1 = document.getElementById("carLane1");  
+  
+  var pos = 0;
+  clearInterval(idLane1);
+  idLane1 = setInterval(frameLane1, frame_rate_lane1);
+
+  function frameLane1() {
+    
+    if (pos == 350) {
+      //clearInterval(id);
+      elem_carLane1 = document.getElementById("carLane1");   
+      pos = 0;
+      clearInterval(idLane1);
+      elem_carLane1.style.left = pos + 'px'; 
+      idLane1 = setInterval(frameLane1, frame_rate_lane1);
+      frameLane1();
+    } else {
+      pos = pos+1;
+      //elem.style.top = pos + 'px'; 
+      elem_carLane1.style.left = pos + 'px'; 
+      if(pos == 250){
+
+        count_cars_lane1 = count_cars_lane1 + 1
+        document.getElementById("lane1Cars").innerHTML = count_cars_lane1
+        
+        let end = Date.now();
+        // elapsed time in milliseconds
+        let elapsed = end - start;   
+        timeInSeconds = elapsed/1000
+        let seconds = Math.floor(timeInSeconds % 60);
+        console.log("seconds lane 1--" + seconds)
+
+        if(seconds >= 10){
+        timeInMins = seconds / 60;
+        console.log("timeInMins--" + timeInMins)
+        document.getElementById("lane1CarTime").innerHTML = timeInMins;
+        t = timeInMins
+        car_rate_flow_per_min_lane1 = count_cars_lane1/t
+        document.getElementById("lane1CarFlow").innerHTML = Math.round(car_rate_flow_per_min_lane1)
+        
+        seconds = 0
+        start = Date.now();
+        count_cars_lane1 = 0
+
+        }
+        
+      }
+    }
+  }
+}
+
+//Lane 2 car move
+
+function lane2CarMove() {
+
+let start = Date.now();
+var elem_carLane2 = document.getElementById("carLane2");  
+
+var pos = 0;
+clearInterval(idLane2);
+idLane2 = setInterval(frame, frame_rate_lane2);
+
+function frame() {
+
+if (pos == 350) {
+  //clearInterval(id);
+  elem_carLane2 = document.getElementById("carLane2");   
+  pos = 0;
+  clearInterval(idLane2);
+  elem_carLane2.style.left = pos + 'px'; 
+  idLane2 = setInterval(frame, frame_rate_lane2);
+  frame();
+} else {
+  pos++; 
+  //elem.style.top = pos + 'px'; 
+  elem_carLane2.style.left = pos + 'px'; 
+  if(pos == 250){
+
+    count_cars_lane2 = count_cars_lane2 + 1
+    document.getElementById("lane2Cars").innerHTML = count_cars_lane2
+    
+    let end = Date.now();
+    // elapsed time in milliseconds
+    let elapsed = end - start;   
+    timeInSeconds = elapsed/1000
+    let seconds = Math.floor(timeInSeconds % 60);
+    console.log("seconds lane2--" + seconds)
+
+    if(seconds >= 10){
+    
+    timeInMins = seconds / 60;
+    console.log("timeInMins--" + timeInMins)
+    document.getElementById("lane2CarTime").innerHTML = timeInMins;
+    t = timeInMins
+    car_rate_flow_per_min_lane2 = count_cars_lane2/t
+    document.getElementById("lane2CarFlow").innerHTML = Math.round(car_rate_flow_per_min_lane2)
+    
+    seconds = 0
+    start = Date.now();
+    count_cars_lane2 = 0
+
+    }
+    
+  }
+}
+}
+}
+</script>
+
+</body>
+</html>
